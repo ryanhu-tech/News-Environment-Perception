@@ -142,7 +142,7 @@ class DatasetLoader(Dataset):
         post_env_file = '../preprocess/NewsEnv/data/{}/{}_data_{}d.pkl'.format(
             dataset, split_set, self.macro_env_days)
         with open(post_env_file, 'rb') as f:
-            post_env_pairs = pickle.load(f)
+            post_env_pairs = pickle.load(f) #從全部新聞中存出 post 與 env之間的pair
 
         print('\n Calculating MacroEnvAvg, MicroEnvAvg, SimDict, and KernelFeatures ...')
         self.MacroEnvAvg = dict()
@@ -155,7 +155,7 @@ class DatasetLoader(Dataset):
         self.kernel_mu = self.tensorize(kernel_mu)
         self.kernel_sigma = self.tensorize(kernel_sigma)
 
-        for i, macro_env_pairs in enumerate(tqdm(post_env_pairs)):
+        for i, macro_env_pairs in enumerate(tqdm(post_env_pairs)):   #進行Perception的部分，輸入post及對應的macro_env
             macro_env_idxs = [p[0] for p in macro_env_pairs]
             micro_env_num = int(max(self.micro_env_min_num, len(
                 macro_env_idxs) * self.micro_env_rate))
@@ -169,14 +169,15 @@ class DatasetLoader(Dataset):
 
             avg_macro_vec = torch.mean(macro_env_vecs, dim=0)
             avg_micro_vec = torch.mean(micro_env_vecs, dim=0)
-            self.MacroEnvAvg[i] = avg_macro_vec
+            self.MacroEnvAvg[i] = avg_macro_vec   #每個post都有對應的 avg_macro
             self.MicroEnvAvg[i] = avg_micro_vec
 
-            self.SimDict['p-mac'][i] = [p[1] for p in macro_env_pairs]
-            self.SimDict['p-mic'][i] = self.SimDict['p-mac'][i][:micro_env_num]
+            self.SimDict['p-mac'][i] = [p[1] for p in macro_env_pairs] # {post_idx_1: [sim1, sim2, ...], post_idx_2: [sim1, sim2, ...]}
+            self.SimDict['p-mic'][i] = self.SimDict['p-mac'][i][:micro_env_num] #因為是根據cos排序，直接挑出前K個相似度最高的
             # (768) -> (micro_env_num, 768) -> (micro_env_num)
             try:
-                self.SimDict['avgmic-mic'][i] = cos_func(
+                #以avg micro 對每個 micro計算cos， 產生{post_idx_1: [sim1, sim2, ...], post_idx_2: [sim1, sim2, ...]}
+                self.SimDict['avgmic-mic'][i] = cos_func(  
                     avg_micro_vec.repeat(micro_env_num, 1), micro_env_vecs).tolist()
             except:
                 print('Idx: {}, len(macro_env_pairs) = {}'.format(i, len(macro_env_pairs)))
@@ -184,7 +185,7 @@ class DatasetLoader(Dataset):
                 print('avg_micro_vec: ', avg_micro_vec.shape)
                 exit()
 
-            for k in ['p-mac', 'p-mic', 'avgmic-mic']:
+            for k in ['p-mac', 'p-mic', 'avgmic-mic']:  #對這三個字典內的相似度vector，全都進行 Gaussian Kernel Pooling
                 self.KernelFeatures[k][i] = self.gaussian_kernel_pooling(
                     self.SimDict[k][i]).tolist()
 
@@ -194,14 +195,14 @@ class DatasetLoader(Dataset):
         with open(tmp_data_file, 'wb') as f:
             pickle.dump(tmp_dict, f)
 
-    def gaussian_kernel_pooling(self, sim_values):
-        k, n = len(kernel_mu), len(sim_values)
+    def gaussian_kernel_pooling(self, sim_values): #將P對應的 new enviroment similarity 進行 pooling
+        k, n = len(kernel_mu), len(sim_values) #在config內設定 kernel_mu，sim_values是對應的環境新聞的相似度
 
         if n == 0:
             return self.tensorize(torch.zeros(k))
 
         # (k) -> (n, k)
-        mu = self.kernel_mu.repeat(n, 1)
+        mu = self.kernel_mu.repeat(n, 1) # 每個相似度都對應到三種mu
         sigma = self.kernel_sigma.repeat(n, 1)
 
         # (n) -> (k, n) -> (n, k)

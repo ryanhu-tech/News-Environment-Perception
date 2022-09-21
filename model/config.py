@@ -24,9 +24,9 @@ DATASETS_ENGLISH = ['Twitter']
 MAX_TOKENS_OF_A_POST = 256
 
 kernel_mu = np.arange(-1, 1.1, 0.1).tolist()
-kernel_sigma = [20 for _ in kernel_mu] #根據kernel_mu的個數，產生出都是20的sigma(這是如何知道要設定20?)
+kernel_sigma = [20 for _ in kernel_mu] #根據kernel_mu的個數，產生出都是20的sigma(但是文章中是寫0.05)
 kernel_mu.append(0.99)
-kernel_sigma.append(100)
+kernel_sigma.append(100) #文章寫0.01
 
 
 parser = ArgumentParser(description='NewsEnv4FEND')

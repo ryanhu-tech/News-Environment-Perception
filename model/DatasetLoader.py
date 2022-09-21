@@ -202,7 +202,7 @@ class DatasetLoader(Dataset):
             return self.tensorize(torch.zeros(k))
 
         # (k) -> (n, k)
-        mu = self.kernel_mu.repeat(n, 1) # 每個相似度都對應到三種mu
+        mu = self.kernel_mu.repeat(n, 1) # 每個相似度都對應到22種mu
         sigma = self.kernel_sigma.repeat(n, 1)
 
         # (n) -> (k, n) -> (n, k)

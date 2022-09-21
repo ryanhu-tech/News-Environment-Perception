@@ -16,17 +16,17 @@ class NewsEnvExtraction(nn.Module):
         self.kernel_mu = self.tensorize(kernel_mu)
         self.kernel_sigma = self.tensorize(kernel_sigma)
 
-        self.macro_env_output_dim = args.macro_env_output_dim
-        self.micro_env_output_dim = args.micro_env_output_dim
+        self.macro_env_output_dim = args.macro_env_output_dim  #128
+        self.micro_env_output_dim = args.micro_env_output_dim  #128
         # self.news_env_output_dim = args.news_env_output_dim
 
         macro_output = 0
         if self.args.use_semantics_of_news_env:
-            macro_output += 2 * args.bert_hidden_dim
+            macro_output += 2 * args.bert_hidden_dim #2*768 來自P及AvgMacro
         if self.args.use_similarity_of_news_env:
-            macro_output += len(kernel_mu)
+            macro_output += len(kernel_mu) # 2*768 + 22 = 1536
 
-        self.macro_mlp = nn.Linear(macro_output, self.macro_env_output_dim)
+        self.macro_mlp = nn.Linear(macro_output, self.macro_env_output_dim) # 1536 * 128
 
         micro_output = 0
         if self.args.use_semantics_of_news_env:

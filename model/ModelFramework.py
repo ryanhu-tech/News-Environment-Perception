@@ -25,7 +25,7 @@ class EnvEnhancedFramework(nn.Module):
         if args.use_news_env:
             self.news_env_extractor = NewsEnvExtraction(args)
 
-            if self.args.strategy_of_fusion == 'att':
+            if self.args.strategy_of_fusion == 'att': #除了文中的gate，也有試著採用MultiheadAttention
                 self.macro_multihead_attn = nn.MultiheadAttention(
                     args.multi_attention_dim, num_heads=8, dropout=0.5)
                 self.micro_multihead_attn = nn.MultiheadAttention(
@@ -34,6 +34,7 @@ class EnvEnhancedFramework(nn.Module):
                 assert args.macro_env_output_dim == args.micro_env_output_dim
                 self.W_gate = nn.Linear(
                     self.fake_news_detector.last_output + args.macro_env_output_dim, args.macro_env_output_dim)
+                #(768+128, 128)
 
         # === MLP layers ===
         if args.use_news_env:
@@ -66,9 +67,9 @@ class EnvEnhancedFramework(nn.Module):
             v_p_mac, v_p_mic, h_mac, h_mic = self.news_env_extractor(
                 idxs, dataset)
 
-            if self.args.strategy_of_fusion == 'concat':
+            if self.args.strategy_of_fusion == 'concat': #方法一
                 output = torch.cat([detector_output, v_p_mac, v_p_mic], dim=-1)
-            elif self.args.strategy_of_fusion == 'att':
+            elif self.args.strategy_of_fusion == 'att': #方法二
                 # (1, bs, 768)
                 key = detector_output.unsqueeze(0)
                 value = key
@@ -81,10 +82,10 @@ class EnvEnhancedFramework(nn.Module):
 
                 output = torch.cat(
                     [detector_output, macro_output.squeeze(0), micro_output.squeeze(0)], dim=-1)
-            elif self.args.strategy_of_fusion == 'gate':
+            elif self.args.strategy_of_fusion == 'gate': #論文主要方法
                 # (bs, env_dim)
                 g = torch.sigmoid(self.W_gate(
-                    torch.cat([detector_output, v_p_mac], dim=-1)))
+                    torch.cat([detector_output, v_p_mac], dim=-1))) 
                 # (bs, env_dim)
                 v_p = g * v_p_mac + (1 - g) * v_p_mic
                 # (bs, env_dim + FEND_last_output)

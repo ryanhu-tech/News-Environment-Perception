@@ -31,14 +31,14 @@ class NewsEnvExtraction(nn.Module):
         micro_output = 0
         if self.args.use_semantics_of_news_env:
             self.micro_sem_mlp = nn.Linear(
-                2 * args.bert_hidden_dim, self.micro_env_output_dim)
-            micro_output += self.micro_env_output_dim
+                2 * args.bert_hidden_dim, self.micro_env_output_dim) # (2*768, 128),這邊對應論文的公式(9)
+            micro_output += self.micro_env_output_dim   
         if self.args.use_similarity_of_news_env:
             self.micro_sim_mlp = nn.Linear(
-                2 * len(kernel_mu), self.micro_env_output_dim)
+                2 * len(kernel_mu), self.micro_env_output_dim) #(2*22, 128),這邊對應論文的公式(10)
             micro_output += self.micro_env_output_dim
 
-        self.micro_mlp = nn.Linear(micro_output, self.micro_env_output_dim)
+        self.micro_mlp = nn.Linear(micro_output, self.micro_env_output_dim) #(128+128, 128)
 
     def forward(self, post_idxs, dataset):
         """

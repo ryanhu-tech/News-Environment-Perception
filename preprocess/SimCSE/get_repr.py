@@ -71,7 +71,7 @@ class PTMEncode(object):
 
     def encode_news(self, L2_normalize=False):
         all_vecs = []
-        data = json.load(open(self.fname, 'r'))
+        data = json.load(open(self.fname, 'r',encoding="utf-8"))
         file_len = len(data)
         content_lst = [d['content'] for d in data]
         num_batch = file_len // self.batch_size + 1

@@ -109,7 +109,7 @@ class PTMEncode(object):
     def encode_post_a_dataset(self, datatype, L2_normalize=False):
         all_vecs = []
         data = json.load(
-            open(os.path.join(self.fname, datatype + '.json'), 'r'))
+            open(os.path.join(self.fname, datatype + '.json'), 'r',encoding="utf-8"))
         file_len = len(data)
         content_lst = [d['content'] for d in data]
         num_batch = file_len // self.batch_size + 1

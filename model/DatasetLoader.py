@@ -18,7 +18,7 @@ class DatasetLoader(Dataset):
         # Fake News Detectors
         pieces_file = '../dataset/{}/post/{}.json'.format(
             self.args.dataset, split_set)
-        with open(pieces_file, 'r') as f:
+        with open(pieces_file, 'r',encoding='utf-8') as f:
             pieces = json.load(f)
 
         if args.model == 'BERT':

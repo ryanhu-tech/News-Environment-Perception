@@ -29,7 +29,7 @@ if __name__ == '__main__':
 
     for t in ['train', 'val', 'test']:
         file = '../../dataset/{}/post/{}.json'.format(args.dataset, t)
-        with open(file, 'r') as f:
+        with open(file, 'r', encoding='utf-8') as f:
             pieces = json.load(f)
 
         pieces_tokens = [get_tokens(p['content']) for p in tqdm(pieces)]

@@ -43,7 +43,7 @@ def get_cosine(post, date2recent_news_idx, all_news_vec, post_vec, dataset, spli
 if __name__ == "__main__":
 
     parser = ArgumentParser(description='get_env')
-    parser.add_argument('--dataset', type=str, default="Chinese")
+    parser.add_argument('--dataset', type=str, default="English")
     parser.add_argument('--macro_env_days', type=int, default=3)
     args = parser.parse_args()
 
@@ -51,13 +51,13 @@ if __name__ == "__main__":
     days = args.macro_env_days
 
     train = json.load(
-        open('../../dataset/{}/post/train.json'.format(dataset), 'r'))
+        open('../../dataset/{}/post/train.json'.format(dataset), 'r',encoding='utf-8'))
     val = json.load(
-        open('../../dataset/{}/post/val.json'.format(dataset), 'r'))
+        open('../../dataset/{}/post/val.json'.format(dataset), 'r',encoding='utf-8'))
     test = json.load(
-        open('../../dataset/{}/post/test.json'.format(dataset), 'r'))
+        open('../../dataset/{}/post/test.json'.format(dataset), 'r',encoding='utf-8'))
     news = json.load(
-        open('../../dataset/{}/news/news.json'.format(dataset), 'r'))
+        open('../../dataset/{}/news/news.json'.format(dataset), 'r',encoding='utf-8'))
 
     train_vec = pickle.load(open(
         '../SimCSE/data/{}/post/train_vecs_origin.pkl'.format(dataset), 'rb'))
@@ -76,7 +76,9 @@ if __name__ == "__main__":
 
     date2idx = {}
     for i in range(len(news)):
-        date = news[i]['time'].split(' ')[0]
+        #date = news[i]['time'].split(' ')[0]
+        date = news[i]['date'].split(' ')[0] #來源資料是用date，後續改用time
+
         if date in date2idx:
             date2idx[date].append(i)
         else:

@@ -10,5 +10,5 @@ use_news_env='true'
 CUDA_VISIBLE_DEVICES=0 \
 python -u main.py \
 --dataset ${dataset_name} --model ${model} --use_news_env ${use_news_env} \
---lr 5e-4 --batch_size 32 --epochs 50 \
+--lr 5e-4 --batch_size 32 --epochs 30 \
 --save ckpts/${dataset_name}/${model}_${use_news_env}

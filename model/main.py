@@ -37,7 +37,7 @@ if __name__ == "__main__":
 
     print('\n{} Experimental Dataset: {} {}\n'.format(
         '=' * 20, args.dataset, '=' * 20))
-    print('save path: ', args.save)
+    print('save path: ', args.save) #為何這裡會是 ckpts/English/BERT_true(在run.sh中設定)
     print('Start time:', time.strftime(
         "%Y-%m-%d %H:%M:%S", time.localtime(time.time())))
 

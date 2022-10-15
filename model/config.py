@@ -21,10 +21,11 @@ INDEX2LABEL = ['real', 'fake']
 DATASETS_CHINESE = ['Weibo']
 DATASETS_ENGLISH = ['Twitter']
 
-MAX_TOKENS_OF_A_POST = 256
+MAX_TOKENS_OF_A_POST = 128 #Bert 英文是128，中文是256
 
 kernel_mu = np.arange(-1, 1.1, 0.1).tolist()
 kernel_sigma = [20 for _ in kernel_mu] #根據kernel_mu的個數，產生出都是20的sigma(但是文章中是寫0.05)
+                                       #因為把sigma放在分子，所以設定時改為整數
 kernel_mu.append(0.99)
 kernel_sigma.append(100) #文章寫0.01
 
@@ -32,7 +33,7 @@ kernel_sigma.append(100) #文章寫0.01
 parser = ArgumentParser(description='NewsEnv4FEND')
 
 # ======================== Dataset ========================
-
+parser.add_argument('--kernel_sigma', type=str, default='0.05') #實際值，文件查閱用
 parser.add_argument('--dataset', type=str, default='Weibo')
 parser.add_argument('--category_num', type=int, default=2)
 parser.add_argument('--save', type=str, default='./ckpts/debug',
@@ -43,7 +44,7 @@ parser.add_argument('--model', type=str,
 
 # ======================== Framework ========================
 
-parser.add_argument('--use_fake_news_detector', type=str2bool, default=True)
+parser.add_argument('--use_fake_news_detector', type=str2bool, default=False) #設定false，要把Fusion方式改成 concat
 
 # --- MLP ---
 parser.add_argument('--num_mlp_layers', type=int, default=3)
@@ -64,7 +65,7 @@ parser.add_argument('--micro_env_output_dim', type=int, default=128)
 
 # --- Fusion with the detection features ---
 parser.add_argument('--strategy_of_fusion', type=str,
-                    default='gate', help=['concat', 'att', 'gate'])
+                    default='concat', help=['concat', 'att', 'gate'])
 parser.add_argument('--multi_attention_dim', type=int, default=128)
 
 # --- Sim Values MLP ---
@@ -72,7 +73,7 @@ parser.add_argument('--use_p_mac', type=str2bool, default=True)
 parser.add_argument('--use_p_mic', type=str2bool, default=True)
 parser.add_argument('--use_avgmic_mic', type=str2bool, default=True)
 
-parser.add_argument('--sim_values_output_dim', type=int, default=512)
+parser.add_argument('--sim_values_output_dim', type=int, default=512)#這是設定哪邊的值?
 
 
 # ======================== Pattern-based Models ========================
@@ -95,7 +96,7 @@ parser.add_argument('--eann_weight_of_event_loss', type=float, default=-1.0)
 
 # --- BERT ---
 parser.add_argument('--bert_pretrained_model',
-                    type=str, default='bert-base-chinese', help='[bert-base-chinese, bert-base-uncased]')
+                    type=str, default='bert-base-uncased', help='[bert-base-chinese, bert-base-uncased]')
 parser.add_argument('--bert_input_max_sequence_length',
                     type=int, default=MAX_TOKENS_OF_A_POST)
 parser.add_argument('--bert_training_embedding_layers',
@@ -138,24 +139,24 @@ parser.add_argument('--declare_bilstm_dropout', type=float, default=0.1)
 
 parser.add_argument('--lr', type=float, default=5e-5,
                     help='initial learning rate')
-parser.add_argument('--epochs', type=int, default=50,
+parser.add_argument('--epochs', type=int, default=30, #原始50
                     help='upper epoch limit')
 parser.add_argument('--batch_size', type=int, default=64, metavar='N',
                     help='batch size')
 parser.add_argument('--start_epoch', type=int, default=0,
                     help='No. of the epoch to start training')
 parser.add_argument('--resume', type=str, default='',
-                    help='path to load trained model')
+                    help='path to load trained model') #inference 階段要設定
 parser.add_argument('--evaluate', type=str2bool, default=False,
-                    help='only use for evaluating')
+                    help='only use for evaluating') #inference 階段要設定
 parser.add_argument('--inference_analysis', type=str2bool,
-                    default=False, help='only use for inferencing')
+                    default=False, help='only use for inferencing') #inference 階段要設定
 
 parser.add_argument('--debug', type=str2bool, default=False)
 
 # ======================== Devices ========================
 
-parser.add_argument('--seed', type=int, default=9,
+parser.add_argument('--seed', type=int, default=100,
                     help='random seed')
 parser.add_argument('--device', default='cpu')
 parser.add_argument('--fp16', type=str2bool, default=True,

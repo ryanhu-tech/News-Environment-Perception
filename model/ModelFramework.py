@@ -36,6 +36,7 @@ class EnvEnhancedFramework(nn.Module):
                     self.fake_news_detector.last_output + args.macro_env_output_dim, args.macro_env_output_dim)
                 #(768+128, 128)
 
+
         # === MLP layers ===
         if args.use_news_env:
             if self.args.strategy_of_fusion == 'concat':

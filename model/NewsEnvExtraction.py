@@ -14,7 +14,7 @@ class NewsEnvExtraction(nn.Module):
         self.args = args
 
         self.kernel_mu = self.tensorize(kernel_mu)
-        self.kernel_sigma = self.tensorize(kernel_sigma)
+        self.kernel_sigma = self.tensorize(kernel_sigma) #確認sigma 有沒有變
 
         self.macro_env_output_dim = args.macro_env_output_dim  #128
         self.micro_env_output_dim = args.micro_env_output_dim  #128
@@ -45,17 +45,18 @@ class NewsEnvExtraction(nn.Module):
         post_idxs: the indexes of posts
         dataset: an instance of DatasetLoader in `DatasetLoader.py`
         """
+        #print(self.kernel_sigma)
         # ------------------ Macro Env ------------------
         if not self.args.use_semantics_of_news_env:
             p = None
             avg_emac = None
         else:
             # (bs, 768)
-            p = [dataset.SimCSERepr['post'][idx.item()] for idx in post_idxs]
+            p = [dataset.SimCSERepr['post'][idx.item()] for idx in post_idxs] #取出post的向量
             p = self.tensorize(p)
 
             # (bs, 768)
-            avg_emac = [dataset.MacroEnvAvg[idx.item()] for idx in post_idxs]
+            avg_emac = [dataset.MacroEnvAvg[idx.item()] for idx in post_idxs] #取出MacroEnv的向量
             avg_emac = self.tensorize(avg_emac)
 
         if not self.args.use_similarity_of_news_env:
@@ -76,7 +77,7 @@ class NewsEnvExtraction(nn.Module):
 
         # (bs, macro_env_output_dim)
         v_p_mac = torch.cat(vectors, dim=-1)
-        v_p_mac = self.macro_mlp(v_p_mac)
+        v_p_mac = self.macro_mlp(v_p_mac) #(bs, 128)
 
         # ------------------ Micro Env ------------------
         if not self.args.use_semantics_of_news_env:
@@ -160,7 +161,7 @@ class NewsEnvExtraction(nn.Module):
         sim_values = sim_values.repeat(k, 1).T
 
         # (n, k) -> (k)
-        kernel_features = torch.exp(-0.5 * ((sim_values - mu) * sigma)**2)
+        kernel_features = torch.exp(-0.5 * ((sim_values - mu) * sigma)**2) #因為把sigma放在分子，所以設定時改為整數
         kernel_features = torch.sum(kernel_features, dim=0)
 
         # # Scale

@@ -4,10 +4,9 @@ from tqdm import tqdm
 import time
 import numpy as np
 import sys
-sys.path.append('../emotion')
+sys.path.append('..\emotion')
 # import extract_emotion_ch
 import extract_emotion_en
-
 
 
 datasets_ch = ['Chinese']
@@ -37,7 +36,7 @@ for dataset in datasets_en:
         os.mkdir(emotion_dir)
 
     split_datasets = [json.load(open(os.path.join(
-        data_dir, '{}.json'.format(t)), 'r')) for t in ['train', 'val', 'test']]
+        data_dir, '{}.json'.format(t)), 'r',encoding='utf-8')) for t in ['train', 'val', 'test']]
     split_datasets = dict(zip(['train', 'val', 'test'], split_datasets))
 
     for t, pieces in split_datasets.items():
@@ -67,7 +66,7 @@ for dataset in datasets_en:
                     p['content'])
                 # p['comments_words'] = [extract_pkg.cut_words_from_text(
                 #     com) for com in p['comments']]
-            with open(os.path.join(output_dir, '{}.json'.format(t)), 'w') as f:
+            with open(os.path.join(output_dir, '{}.json'.format(t)), 'w',encoding='utf-8') as f:
                 json.dump(pieces, f, indent=4, ensure_ascii=False)
 
         # Only publisher emotion

@@ -108,7 +108,7 @@ class BERT(nn.Module):
 
         if args.bert_use_emotion:
             self.mlp = nn.Linear(
-                self.last_output + args.bert_emotion_features_dim, self.last_output)
+                self.last_output + args.bert_emotion_features_dim, self.last_output) #bert_emotion_features_dim 要設多少
 
     def forward(self, idxs, dataset):
         inputs = [self._encode(dataset.tokens[idx.item()]) for idx in idxs]

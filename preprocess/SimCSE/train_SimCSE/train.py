@@ -56,6 +56,7 @@ class CSECollator(object):
         for example in batch:
             for i in range(2):
                 # repeat every sentence twice
+                #為了產生 positive pair and negative pair
                 new_batch.append({fea: example[fea] for fea in self.features})
         new_batch = self.tokenizer.pad(
             new_batch,
@@ -145,12 +146,17 @@ def load_data(args, tokenizer):
 
 def compute_loss(y_pred, tau=0.05):
     idxs = torch.arange(0, y_pred.shape[0], device=device)
-    y_true = idxs + 1 - idxs % 2 * 2
-    similarities = F.cosine_similarity(
-        y_pred.unsqueeze(1), y_pred.unsqueeze(0), dim=2)
-    similarities = similarities - \
-        torch.eye(y_pred.shape[0], device=device) * 1e12
+    # 得到y_pred對應的label, [1, 0, 3, 2, ..., batch_size-1, batch_size-2]
+    y_true = idxs + 1 - idxs % 2 * 2 
+    # batch內兩兩計算相似度, 得到相似度矩陣(對角矩陣)
+    similarities = F.cosine_similarity( y_pred.unsqueeze(1), y_pred.unsqueeze(0), dim=2)
+    # 將相似度矩陣對角線先去除再加上很小的值, 消除自身的影響
+    similarities = similarities - torch.eye(y_pred.shape[0], device=device) * 1e12
+    # 相似度矩陣除以溫度係數
     similarities = similarities / tau
+    # 計算相似度矩陣與y_true的交叉熵損失
+    # 計算交叉熵，每個case都會計算與其他case的相似度得分，得到一個得分向量
+    # 目的是使得該得分向量中正樣本的得分最高，負樣本的得分最低
     loss = F.cross_entropy(similarities, y_true)
     return torch.mean(loss)
 

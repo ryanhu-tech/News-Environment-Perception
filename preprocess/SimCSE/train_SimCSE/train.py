@@ -38,8 +38,8 @@ class SimCSE(nn.Module):
                               attention_mask=attention_mask,
                               token_type_ids=token_type_ids)
         if self.pool_type == "cls":
-            output = output.last_hidden_state[:, 0]
-        elif self.pool_type == "pooler":
+            output = output.last_hidden_state[:, 0] # [batch, 768]
+        elif self.pool_type == "pooler": # [batch, 768]
             output = output.pooler_output
         return output
 
@@ -57,7 +57,8 @@ class CSECollator(object):
             for i in range(2):
                 # repeat every sentence twice
                 #為了產生 positive pair and negative pair
-                new_batch.append({fea: example[fea] for fea in self.features})
+                #把featre {"input_ids", "attention_mask", "token_type_ids"} 重複加入一次一樣的句子
+                new_batch.append({fea: example[fea] for fea in self.features}) 
         new_batch = self.tokenizer.pad(
             new_batch,
             padding=False,
@@ -140,13 +141,14 @@ def load_data(args, tokenizer):
     collator = CSECollator(tokenizer)
     dl = DataLoader(ds_tokenized["train"],
                     batch_size=args.batch_size,
-                    collate_fn=collator.collate)
+                    collate_fn=collator.collate) #訓練階段時collate會讀取當下batch的資料
     return dl
 
 
 def compute_loss(y_pred, tau=0.05):
     idxs = torch.arange(0, y_pred.shape[0], device=device)
-    # 得到y_pred對應的label, [1, 0, 3, 2, ..., batch_size-1, batch_size-2]
+    # 得到y_pred對應的label, [1, 0, 3, 2, ..., batch_size-1, batch_size-2]，為何要這樣設定，不能直接[0,1,2,3,....]嗎?
+    # 因為跟相似度矩陣的True label對應位置有關係
     y_true = idxs + 1 - idxs % 2 * 2 
     # batch內兩兩計算相似度, 得到相似度矩陣(對角矩陣)
     similarities = F.cosine_similarity( y_pred.unsqueeze(1), y_pred.unsqueeze(0), dim=2)
@@ -183,6 +185,8 @@ def train(args, model_out):
             pred = model(input_ids=data["input_ids"].to(device),
                          attention_mask=data["attention_mask"].to(device),
                          token_type_ids=data["token_type_ids"].to(device))
+            #pred是一個batch中，每個樣本都有兩句子，但是dropout位置不一樣
+            #同個句子視為positive pair ，與其他樣本間視為negative pair
             loss = compute_loss(pred, args.tau)
             optimizer.zero_grad()
             loss.backward()

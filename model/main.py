@@ -105,7 +105,7 @@ if __name__ == "__main__":
 
     print('-----------------------------------------\nLoading model...\n')
     start = time.time()
-    model = EnvEnhancedFramework(args)
+    model = EnvEnhancedFramework(args) #進入模型的框架
     print(model)
     print('\nLoading model time: {:.2f}s\n-----------------------------------------\n'.format(
         time.time() - start))

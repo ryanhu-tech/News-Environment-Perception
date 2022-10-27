@@ -44,8 +44,8 @@ parser.add_argument('--model', type=str,
 
 # ======================== Framework ========================
 
-parser.add_argument('--use_fake_news_detector', type=str2bool, default=False) #設定false，要把Fusion方式改成 concat
-
+parser.add_argument('--use_fake_news_detector', type=str2bool, default=True) #設定false，要把Fusion方式改成 concat
+parser.add_argument('--use_SimCSE_BERT', type=str2bool, default=True)
 # --- MLP ---
 parser.add_argument('--num_mlp_layers', type=int, default=3)
 
@@ -65,7 +65,7 @@ parser.add_argument('--micro_env_output_dim', type=int, default=128)
 
 # --- Fusion with the detection features ---
 parser.add_argument('--strategy_of_fusion', type=str,
-                    default='concat', help=['concat', 'att', 'gate'])
+                    default='gate', help=['concat', 'att', 'gate'])
 parser.add_argument('--multi_attention_dim', type=int, default=128)
 
 # --- Sim Values MLP ---
@@ -106,6 +106,10 @@ parser.add_argument('--bert_training_inter_layers',
 parser.add_argument('--bert_hidden_dim', type=int, default=768)
 parser.add_argument('--bert_use_emotion', type=str2bool, default=False)
 parser.add_argument('--bert_emotion_features_dim', type=int, default=0)
+
+# --- SimCSE BERT ---
+parser.add_argument('--SimCSE_pretrained_Bert_model',
+                    type=str, default='../preprocess/SimCSE/train_SimCSE/ckpts/English')
 
 # ======================== Fact-based Models ========================
 
@@ -156,7 +160,7 @@ parser.add_argument('--debug', type=str2bool, default=False)
 
 # ======================== Devices ========================
 
-parser.add_argument('--seed', type=int, default=100,
+parser.add_argument('--seed', type=int, default=9,
                     help='random seed')
 parser.add_argument('--device', default='cpu')
 parser.add_argument('--fp16', type=str2bool, default=True,

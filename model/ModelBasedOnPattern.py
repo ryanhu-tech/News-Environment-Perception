@@ -9,6 +9,11 @@ from transformers import BertModel
 from NewsEnvExtraction import NewsEnvExtraction
 
 
+
+#Detector 試用經過SimCSE 的Bert
+#參考下面Bert及 preprocess/SimCSE/get_repr.py改下去
+from transformers import BertTokenizer, BertConfig, BertModel
+
 class BiLSTM(nn.Module):
     def __init__(self, args):
         super(BiLSTM, self).__init__()
@@ -66,8 +71,16 @@ class BERT(nn.Module):
 
         self.args = args
 
+        if args.use_SimCSE_BERT:
+            self.bert_preetrained_model = args.SimCSE_pretrained_Bert_model
+            print('Using SimCSE_BERT')
+            print(self.bert_preetrained_model)
+        else:
+            self.bert_preetrained_model = args.bert_pretrained_model
+            print('Using BERT')
+
         self.bert = BertModel.from_pretrained(
-            args.bert_pretrained_model, return_dict=False)
+            self.bert_preetrained_model, return_dict=False)
 
         for name, param in self.bert.named_parameters():
             # finetune the pooler layer

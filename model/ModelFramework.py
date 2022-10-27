@@ -16,7 +16,7 @@ class EnvEnhancedFramework(nn.Module):
 
         # === FEND ===
         if args.use_fake_news_detector:
-            self.fake_news_detector = eval('{}(args)'.format(args.model))
+            self.fake_news_detector = eval('{}(args)'.format(args.model)) #選用模型
             last_output = self.fake_news_detector.last_output
         else:
             last_output = 0
